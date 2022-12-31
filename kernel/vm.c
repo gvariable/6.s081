@@ -446,6 +446,7 @@ static void _vmprint(pagetable_t pagetable, int level){
         printf(" ..");
       }
       printf("%d: pte %p pa %p\n", i, pte, child);
+      // riscv privileged ISA manual
       if((pte & (PTE_R|PTE_W|PTE_X)) == 0){
       _vmprint((pagetable_t)child, level + 1);
       }

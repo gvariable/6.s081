@@ -1,0 +1,2 @@
+According to Fig 3-4, page 0 contains process text, page 1 contains process data, page 2 contains stack
+last three contains usyscall, trapframe and trampoline.
