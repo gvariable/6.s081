@@ -1,0 +1,6 @@
+1. ax contains integer arguments to functions. a2 holds 13 in main's call to printf.
+2. The call to function f in the assembly code for main is optimized by compiler probably. But the call to g is inlined by compiler.
+3. The function printf is located in 0x642.
+4. Address 0x38, the next instruction of jalr.
+5. The output is HE110 World.
+6. The value of register a2 will be printed.
