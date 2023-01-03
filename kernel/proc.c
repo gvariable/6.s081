@@ -89,6 +89,13 @@ myproc(void)
   return p;
 }
 
+static void initalarm(struct alarm * alarm){
+  alarm->ticks = 0;
+  alarm->left = 0;
+  alarm->handler = (void (*))0;
+  alarm->returned = 1;
+}
+
 int
 allocpid()
 {
@@ -124,6 +131,8 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+
+  initalarm(&p->alarm);
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){

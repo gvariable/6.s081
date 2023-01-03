@@ -81,6 +81,25 @@ struct trapframe {
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+struct state{
+  uint64 ra;
+  uint64 s0;
+  uint64 sp;
+  uint64 epc;
+  uint64 a0;
+  uint64 a1;
+};
+
+struct alarm{
+  int left;
+  int ticks;
+  void (*handler)();
+  char returned;
+  
+  struct state state;
+  
+};
+
 // Per-process state
 struct proc {
   struct spinlock lock;
@@ -91,6 +110,7 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
+  struct alarm alarm;
 
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
