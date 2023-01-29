@@ -49,7 +49,7 @@ usertrap(void)
   
   // save user program counter.
   p->trapframe->epc = r_sepc();
-  
+
   if(r_scause() == 8){
     // system call
 
@@ -65,7 +65,27 @@ usertrap(void)
     intr_on();
 
     syscall();
-  } else if((which_dev = devintr()) != 0){
+  }else if(r_scause() == 15) {
+    // store page fault
+    // TODO(gpl): originally read-only page
+    // TODO(gpl): reference count
+    
+    /* DEBUG */
+    printf("usertrap(): store page fault, pid=%d\n", p->pid);
+    printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+    setkilled(p);
+    /* DEBUG */
+
+    char* mem = kalloc();
+    if(mem == 0){
+      printf("out of memory");
+      setkilled(p);
+    }
+    else {
+      // memmove(mem, )
+    }
+  }
+  else if((which_dev = devintr()) != 0){
     // ok
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
