@@ -29,6 +29,26 @@ trapinithart(void)
   w_stvec((uint64)kernelvec);
 }
 
+static void pgfaulthdl(void){
+  struct proc* p = myproc();
+  uint64 va = r_stval();
+  char* mem = 0;
+
+  if(va <= p->sz && va > p->trapframe->sp && (mem = kalloc()) != 0){
+    if(mappages(p->pagetable, PGROUNDDOWN(va), PGSIZE, (uint64)mem, PTE_U | PTE_W | PTE_R) != 0){
+      kfree(mem);
+      goto err;
+    }
+  }else{
+    goto err;
+  }
+  return;
+
+err:
+  setkilled(p);
+  return;
+}
+
 //
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
@@ -65,25 +85,8 @@ usertrap(void)
     intr_on();
 
     syscall();
-  }else if(r_scause() == 15) {
-    // store page fault
-    // TODO(gpl): originally read-only page
-    // TODO(gpl): reference count
-    
-    /* DEBUG */
-    printf("usertrap(): store page fault, pid=%d\n", p->pid);
-    printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
-    setkilled(p);
-    /* DEBUG */
-
-    char* mem = kalloc();
-    if(mem == 0){
-      printf("out of memory");
-      setkilled(p);
-    }
-    else {
-      // memmove(mem, )
-    }
+  }else if(r_scause() == 13 || r_scause() == 15) {
+    pgfaulthdl();
   }
   else if((which_dev = devintr()) != 0){
     // ok

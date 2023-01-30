@@ -254,6 +254,25 @@ userinit(void)
   release(&p->lock);
 }
 
+int lazygrowproc(int n){
+  uint64 sz;
+  struct proc* p = myproc();
+
+  sz = p->sz;
+  if(n + sz > MAXVA){
+    return -1;
+  }
+
+  if(n < 0){
+    sz = uvmdealloc(p->pagetable, sz, sz + n);
+  }else{
+    sz += n;
+  }
+  p->sz = sz;
+
+  return 0;
+}
+
 // Grow or shrink user memory by n bytes.
 // Return 0 on success, -1 on failure.
 int
@@ -289,7 +308,7 @@ fork(void)
   }
 
   // Copy user memory from parent to child.
-  if(uvmcopylab(p->pagetable, np->pagetable, p->sz) < 0){
+  if(uvmlazycopy(p->pagetable, np->pagetable, p->sz) < 0){
     freeproc(np);
     release(&np->lock);
     return -1;
